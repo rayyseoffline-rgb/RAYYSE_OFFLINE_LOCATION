@@ -5,9 +5,10 @@ app = Flask(__name__)
 
 locations = []
 
+
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("dashboard.html", locations=locations)
 
 
 @app.route("/send_location", methods=["POST"])
