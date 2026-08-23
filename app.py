@@ -10,20 +10,29 @@ LINK_FILE = "links.json"
 LOCATION_FILE = "locations.json"
 
 
-def load_data(filename):
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as file:
-            return json.load(file)
-    return []
+def load_json(file):
+    try:
+        if os.path.exists(file):
+            with open(file, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except:
+        pass
+    return {}
 
 
-def save_data(filename, data):
-    with open(filename, "w", encoding="utf-8") as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
+def save_json(file, data):
+    with open(file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-links = {}
-locations = load_data(LOCATION_FILE)
+links = load_json(LINK_FILE)
+locations = load_json(LOCATION_FILE)
+
+if not isinstance(links, dict):
+    links = {}
+
+if not isinstance(locations, list):
+    locations = []
 
 
 @app.route("/")
@@ -39,6 +48,8 @@ def create_link():
     links[link_id] = {
         "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
+
+    save_json(LINK_FILE, links)
 
     return jsonify({
         "link": "/share/" + link_id
@@ -60,7 +71,10 @@ def share(link_id):
 @app.route("/send_location/<link_id>", methods=["POST"])
 def send_location(link_id):
 
-    data = request.json
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "no data"}), 400
 
     locations.append({
         "id": link_id,
@@ -69,7 +83,7 @@ def send_location(link_id):
         "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
-    save_data(LOCATION_FILE, locations)
+    save_json(LOCATION_FILE, locations)
 
     return jsonify({
         "status": "received"
