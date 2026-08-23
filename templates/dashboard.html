@@ -1,54 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAYYSE OFFLINE</title>
-
+    <title>RAYYSE OFFLINE | Location Share</title>
+    <!-- اتصال به فایل استایل با ساختار Flask -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="container">
+    <div class="container">
+        <div class="card">
+            <h1>⚡ RAYYSE OFFLINE</h1>
+            <h2>اشتراک موقعیت</h2>
+            <p>برای ارسال موقعیت، اجازه دسترسی به موقعیت مکانی خود را فعال کنید.</p>
+            
+            <div class="info">
+                🔒 اطلاعات شما فقط با اجازه خودتان ارسال می‌شود.
+            </div>
 
-    <h1>⚡ RAYYSE OFFLINE</h1>
-    <p class="status">Location System Online</p>
+            <button onclick="sendLocation()">📍 اشتراک موقعیت</button>
 
-    <div class="card">
-        <h2>📍 Location Dashboard</h2>
-
-        <button onclick="getLocation()">
-            Send My Location
-        </button>
-
-        <div id="result">
-            Waiting for location...
+            <div id="result">منتظر اجازه شما هستیم...</div>
         </div>
     </div>
 
+    <script>
+    function sendLocation() {
+        let result = document.getElementById("result");
+        result.innerHTML = "📡 در حال بررسی اجازه موقعیت...";
 
-    <div class="card">
-        <h2>Saved Locations</h2>
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                // موفقیت در دریافت موقعیت
+                function(position) {
+                    let lat = position.coords.latitude;
+                    let lng = position.coords.longitude;
 
-        {% if locations %}
-            {% for loc in locations %}
-            <div class="location">
-                Latitude: {{ loc.lat }} <br>
-                Longitude: {{ loc.lng }}
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>No locations yet</p>
-        {% endif %}
+                    result.innerHTML = "⏳ در حال ارسال اطلاعات به سرور...";
 
-    </div>
-
-
-</div>
-
-
-<script src="{{ url_for('static', filename='app.js') }}"></script>
-
+                    fetch("/send_location/{{link_id}}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            lat: lat,
+                            lng: lng
+                        })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            result.innerHTML = "✅ موقعیت با موفقیت ارسال شد.";
+                        } else {
+                            result.innerHTML = "❌ خطا در ذخیره‌سازی اطلاعات روی سرور.";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        result.innerHTML = "❌ خطای شبکه! ارتباط با سرور برقرار نشد.";
+                    });
+                },
+                // عدم اجازه یا خطا در دریافت موقعیت
+                function(error) {
+                    if (error.code === error.PERMISSION_DENIED) {
+                        result.innerHTML = "❌ اجازه دسترسی به موقعیت داده نشد.";
+                    } else {
+                        result.innerHTML = "❌ خطا در دریافت موقعیت مکانی.";
+                    }
+                }
+            );
+        } else {
+            result.innerHTML = "مرورگر شما از موقعیت پشتیبانی نمی‌کند.";
+        }
+    }
+    </script>
 </body>
 </html>
