@@ -1,62 +1,20 @@
-function getLocation(){
+from flask import Flask, render_template, jsonify
 
-    let status = document.getElementById("status");
+app = Flask(__name__)
 
-    status.innerHTML = "📡 در حال اتصال به GPS...";
-
-    if (navigator.geolocation){
-
-        navigator.geolocation.getCurrentPosition(
-
-        function(position){
-
-            let latitude = position.coords.latitude;
-            let longitude = position.coords.longitude;
+@app.route("/")
+def home():
+    return render_template("dashboard.html")
 
 
-            fetch("/send_location",{
-
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json"
-                },
-
-                body:JSON.stringify({
-
-                    lat: latitude,
-                    lng: longitude
-
-                })
-
-            })
-
-            .then(()=>{
-
-                status.innerHTML =
-                "✅ موقعیت با موفقیت ارسال شد";
-
-            });
+@app.route("/status")
+def status():
+    return jsonify({
+        "name": "RAYYSE OFFLINE",
+        "status": "ONLINE",
+        "system": "ACTIVE"
+    })
 
 
-        },
-
-
-        function(){
-
-            status.innerHTML =
-            "❌ اجازه موقعیت داده نشد";
-
-        });
-
-
-    }
-
-    else{
-
-        status.innerHTML =
-        "مرورگر شما GPS را پشتیبانی نمی‌کند";
-
-    }
-
-}
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
