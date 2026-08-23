@@ -1,9 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>RAYYSE OFFLINE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAYYSE OFFLINE</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-<h1>RAYYSE OFFLINE</h1>
+
+<div class="container">
+
+    <h1>⚡ RAYYSE OFFLINE</h1>
+    <p class="status">Location System Online</p>
+
+    <div class="card">
+        <h2>📍 Location Dashboard</h2>
+
+        <button onclick="getLocation()">
+            Send My Location
+        </button>
+
+        <div id="result">
+            Waiting for location...
+        </div>
+    </div>
+
+
+    <div class="card">
+        <h2>Saved Locations</h2>
+
+        {% if locations %}
+            {% for loc in locations %}
+            <div class="location">
+                Latitude: {{ loc.lat }} <br>
+                Longitude: {{ loc.lng }}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No locations yet</p>
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
 </body>
 </html>
