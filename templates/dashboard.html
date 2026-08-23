@@ -2,78 +2,46 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RAYYSE OFFLINE</title>
-
-<style>
-body{
-    background:#111;
-    color:white;
-    font-family:tahoma;
-    text-align:center;
-    padding-top:100px;
-}
-
-.box{
-    background:#222;
-    padding:30px;
-    margin:auto;
-    width:80%;
-    max-width:400px;
-    border-radius:15px;
-}
-
-button{
-    padding:15px 25px;
-    border:0;
-    border-radius:10px;
-    background:#008cff;
-    color:white;
-    font-size:18px;
-}
-
-#link{
-    margin-top:20px;
-    word-break:break-all;
-}
-</style>
-
+<title>Share Location</title>
 </head>
 
-<body>
+<body style="text-align:center;font-family:tahoma">
 
-<div class="box">
+<h2>📍 اشتراک موقعیت</h2>
 
-<h1>📍 RAYYSE OFFLINE</h1>
+<p>برای ارسال موقعیت، اجازه دسترسی را بدهید.</p>
 
-<p>ساخت لینک موقعیت</p>
-
-<button onclick="makeLink()">
-ساخت لینک
+<button onclick="sendLocation()">
+ارسال موقعیت
 </button>
-
-<div id="link"></div>
-
-</div>
 
 
 <script>
 
-function makeLink(){
+function sendLocation(){
 
-fetch("/create_link")
-.then(r=>r.json())
-.then(data=>{
+navigator.geolocation.getCurrentPosition(
+function(position){
 
-document.getElementById("link").innerHTML =
-"لینک:<br>" +
-window.location.origin + data.link;
-
+fetch("/send_location/{{link_id}}",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+lat:position.coords.latitude,
+lng:position.coords.longitude
 })
-.catch(()=>{
-document.getElementById("link").innerHTML="خطا در ساخت لینک";
+})
+.then(()=>{
+alert("موقعیت ارسال شد");
 });
+
+},
+function(){
+alert("اجازه موقعیت داده نشد");
+}
+);
 
 }
 
